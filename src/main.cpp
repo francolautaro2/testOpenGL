@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <shader/shader.hpp>
 
 // Funciones de devolución de llamada (callbacks)
@@ -49,23 +48,20 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = vec4(0.5f, 0.5f, 0.5f, 1.0f); // Color gris
 }
 )";
-
 
 void checkShaderCompileStatus(unsigned int shader, const std::string& type);
 void checkProgramLinkStatus(unsigned int program);
 
 int main() {
-    
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Dibujar Piso", NULL, NULL);
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -75,17 +71,14 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
-
-    
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
 
-    
+    // Compilar y enlazar shaders
     unsigned int vertexShader, fragmentShader, shaderProgram;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -106,12 +99,11 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    
-    float vertices[] = {      
-         0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,  
-        -0.5f, -0.5f, 0.0f,  
-        -0.5f,  0.5f, 0.0f   
+    float vertices[] = {
+         5.0f,  0.0f,  5.0f,
+         5.0f,  0.0f, -5.0f,
+        -5.0f,  0.0f, -5.0f,
+        -5.0f,  0.0f,  5.0f,
     };
     unsigned int indices[] = {
         0, 1, 3,
@@ -123,75 +115,56 @@ int main() {
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    
     glBindVertexArray(VAO);
 
-    
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-   
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
-
-     
     glBindVertexArray(0); 
 
-   
+    // Bucle de renderizado
     while (!glfwWindowShouldClose(window)) {
-       
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        
         processInput(window);
 
-        
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        
         glUseProgram(shaderProgram);
 
-      
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-        
         unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
         unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
-        
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         
-     
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
 
-    
     glfwTerminate();
     return 0;
 }
-
 
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -248,4 +221,3 @@ void checkProgramLinkStatus(unsigned int program) {
         std::cerr << "ERROR::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 }
-
