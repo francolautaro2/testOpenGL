@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "C/C++: g++.exe build active file",
+            "type": "shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "chcp 65001>nul && C:\\msys64\\ucrt64\\bin\\g++.exe",
+                "-fdiagnostics-color=always",
+                "-I${workspaceFolder}/include",
+                "-g",
+                "${workspaceFolder}/src/main.cpp",
+                "${workspaceFolder}/src/glad.c",
+                "${workspaceFolder}/src/camera.cpp",
+                "${workspaceFolder}/src/shader.cpp",
+                "-o",
+                "${workspaceFolder}/main.exe",
+                "-L${workspaceFolder}/lib",
+                "-lglfw3dll",
+                "-lopengl32"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "Generated task by me"
+        }
+    ]
+}
