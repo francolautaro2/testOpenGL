@@ -23,10 +23,6 @@ This repository provides a basic setup for an OpenGL camera, including example c
 
 The project includes basic camera controls. Use keyboard and mouse input to move and rotate the camera.
 
-### License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ---
 
 Feel free to modify the code for your needs. If you have any questions, feel free to reach out!
