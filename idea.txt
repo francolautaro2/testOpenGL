@@ -1,0 +1,3 @@
+links and resources.
+ui design -> https://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
+load models -> https://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
