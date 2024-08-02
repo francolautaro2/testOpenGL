@@ -7,6 +7,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <shader/shader.hpp>
 
+
+using namespace std;
+
 // Funciones de devolución de llamada (callbacks)
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -134,6 +137,7 @@ int main() {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        cout << lastFrame << endl;
 
         processInput(window);
 

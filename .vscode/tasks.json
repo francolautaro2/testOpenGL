@@ -15,6 +15,7 @@
                 "${workspaceFolder}/src/glad.c",
                 "${workspaceFolder}/src/camera.cpp",
                 "${workspaceFolder}/src/shader.cpp",
+                "${workspaceFolder}/src/texture.cpp",
                 "-o",
                 "${workspaceFolder}/main.exe",
                 "-L${workspaceFolder}/lib",
