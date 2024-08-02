@@ -1,3 +1,4 @@
 links and resources.
 ui design -> https://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
 load models -> https://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
+                https://www.reddit.com/r/opengl/comments/gd8m7r/obj_loader_c_tutorial/
