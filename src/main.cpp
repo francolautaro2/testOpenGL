@@ -6,7 +6,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <shader/shader.hpp>
-
+#include "Mesh.hpp"
+#include "OBJLoader.hpp"
 
 using namespace std;
 
@@ -30,17 +31,21 @@ bool firstMouse = true;
 float deltaTime = 0.0f;  // Tiempo entre el frame actual y el anterior
 float lastFrame = 0.0f;  // Tiempo del último frame
 
+// Escala del modelo
+float scale = 0.1f;
+
 // Vertex Shader source code
 const char* vertexShaderSource = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
 
+uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
-    gl_Position = projection * view * vec4(aPos, 1.0);
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
 }
 )";
 
@@ -64,7 +69,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Dibujar Piso", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Renderizar OBJ", NULL, NULL);
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -102,69 +107,48 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    float vertices[] = {
-         5.0f,  0.0f,  5.0f,
-         5.0f,  0.0f, -5.0f,
-        -5.0f,  0.0f, -5.0f,
-        -5.0f,  0.0f,  5.0f,
-    };
-    unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
-
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0); 
-    glBindVertexArray(0); 
+    // Cargar el modelo
+    Mesh mesh;
+    if (!loadOBJ("models/-47.obj", mesh)) {
+        std::cerr << "Failed to load OBJ file" << std::endl;
+        return -1;
+    }
+    mesh.setupMesh();
 
     // Bucle de renderizado
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        cout << lastFrame << endl;
 
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
 
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(scale)); // Matriz de modelo con la escala
 
+        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
         unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
         unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        
+        mesh.renderMesh();
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &mesh.VAO);
+    glDeleteBuffers(1, &mesh.VBO);
+    glDeleteBuffers(1, &mesh.EBO);
 
     glfwTerminate();
     return 0;
@@ -225,3 +209,4 @@ void checkProgramLinkStatus(unsigned int program) {
         std::cerr << "ERROR::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 }
+

@@ -16,6 +16,8 @@
                 "${workspaceFolder}/src/camera.cpp",
                 "${workspaceFolder}/src/shader.cpp",
                 "${workspaceFolder}/src/texture.cpp",
+                "${workspaceFolder}/src/OBJLoader.cpp",
+                "${workspaceFolder}/src/Mesh.cpp",
                 "-o",
                 "${workspaceFolder}/main.exe",
                 "-L${workspaceFolder}/lib",
